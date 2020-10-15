@@ -1,0 +1,213 @@
+---
+title: "Lista de Exercícios 1 - ADAR/UFSM"
+author: "Jerônimo Acker D'Ornellas"
+date: "2020-09-01"
+output: html_document
+---
+
+
+```{r config, include=FALSE}
+rm(list = ls())
+knitr::opts_chunk$set(
+  echo = TRUE,
+  prompt = FALSE,
+  collapse = TRUE,
+  include = TRUE
+)
+```
+
+
+## Exercícios
+
+1. Execute as seguintes expressões no R mostrando os resultados obtidos.
+
+
+```{r}
+1 + 1
+100:130
+5 - +1
+3 %% 5
+2 * 3
+4 - 1
+6 / (4 - 1)
+```
+
+
+2. Utilize uma expressão para cada item. <br>
+    a.Escolha um número e some 3 a ele. <br>
+    b.Multiplique o resultado por 2. <br>
+    b.Subtraia 10 da resposta. <br>
+    c.Divida o que foi obtido por 4.
+  
+```{r}
+num <- 5
+(oper2_1 <- num + 3)
+(oper2_2 <- oper2_1 * 2)
+(oper2_3 <- oper2_2 - 10)
+(oper2_4 <- oper2_3 / 4)
+```
+   
+    
+3. Calcule  $\sqrt{16}$, $16^{0.5^{3}}$, $(16^{0.5})^{3}$ e $4^{\frac{3}{2}}$.    
+
+```{r}
+(oper3_1 <- sqrt(16))
+(oper3_2 <- 16^(0.5^3))
+(oper3_3 <- (16^0.5)^3)
+(oper3_4 <- 4^(3 / 2))
+```
+
+
+4. Teste as expressões `log10(1000)`, `log(1000)`, `exp(log(1000))`. Depois teste a expressão `log2(64)`. Verifique se você entendeu as diferentes funções logarítmicas.
+
+```{r}
+(oper4_1 <- log10(1000)) # logarítmo com base 10
+(oper4_2 <- log(1000)) # logarítmo neperiano
+(oper4_3 <- exp(log(1000))) # exponencial de ln é o próprio logaritmando
+(oper4_4 <- log2(64)) # logaritmo com base 2
+```
+
+
+5.  Defina as variáveis abaixo tomando cuidados ao nomear as variáveis, conforme visto em sala de aula. Mostre os valores para as seguintes constantes: 
+
+    a. Velocidade da luz: $v = 2.998 \times 10^8 [ms^{-1}]$. 
+    
+    b. Carga elementar ou eletrônica $e = 1.602 \times 10^{-19}[C]$. 
+    
+    c. Permissividade do vácuo $\varepsilon_o = 8.85 \times 10^{-12}[C^2 N^{-1} m^2]$. 
+    
+    d. Constante de Planck $h = 6.626 \times 10^{-34}[Js]$.
+    
+    e. Constante de Stefan Boltzman $\sigma = 5.67 \times 10^{-8}[Wm^{-2}K^{-4}]$
+    
+    f. Constante solar: $S_0 = 1380[Wm^{-2}]$
+    
+    g. Constante de Avogrado: $N_A = 6.022 \times 10^{23}[mol^{-1}]$
+    
+    h. Constante dos gases para o ar seco:$R_d = 287.04[JK^{-1}kg^{-1}]$
+    
+    i. Constante dos gases ideais para o vapor:$R_w = 461.5[JK^{-1}kg^{-1}]$
+    
+    j. Densidade do ar seco para CNTP (à 0° C em 1000 mb):$\rho = 1.2754[kgm^{-3}]$
+    
+    k. Pressão média ao nível do mar para a atmosfera padrão:$P_0 = 1013.25[mb]$
+    
+    l. Temperatura ao nível médio do mar para atmosfera padrão: $T_0 = 288.15[K]$
+    
+    m. Calor latente de vaporização ou condensação (à 0 °C): $\lambda_v = 2.501 \times 10^6 [Jkg^{-1}]$
+    
+    n. Calor latente de fusão (à 0 °C): $\lambda_v = 0.334 \times 10^6 [Jkg^{-1}]$
+    
+    o. Massa molecular da água:$M_w = 18.016 [gmol^{-1}]$
+    
+    p. Peso molecular do ar: $M_{ar} = 28.96[gmol^{-1}]$
+    
+    q. Raio da terra:$r = 6.37 \times 10^6[m]$
+    
+    r. Velocidade angular da Terra:$\Omega = 7.29 \times 10^{-5}[rads^{-1}]$ 
+
+
+```{r}
+(veloc_luz <- 2.998e8)
+(carga_eletron <- 1.602e-19)
+(perm_vacuo <- 8.85e-12)
+(const_planck <- 6.626e-34)
+(const_sb <- 5.67e-8)
+(const_solar <- 1380)
+(const_avogrado <- 6.022e23)
+(rd <- 287.04)
+(rw <- 461.5)
+(densidade_arseco <- 1.2754)
+(po <- 1013.25)
+(to <- 288.15)
+(lambda_v <- 2.501e6)
+(lambda_f <- 0.334e6)
+(mw <- 18.016)
+(mar <- 28.96)
+(raio_terra <- 6.37e6)
+(veloc_angterra <- 7.29e-5)
+```
+
+6. *a.* Como você pode fazer para que a constante `pi` seja mostrada com 20 dígitos? (b) Como voltar a trabalhar a com 7 dígitos novamente? *c.* Mostre o número neperiano com 7 dígitos.
+
+```{r}
+# a) const pi mostrada com 20 dígitos
+options(digits = 20)
+pi
+# b) const pi mostrada com 7 dígitos
+options(digits = 7)
+pi
+# c) número neperiano com 7 dígítos
+exp(1)
+```
+
+7. Determine a temperatura de bulbo úmido ($T_w$) usando a expressão empírica ([Stull,2011](https://journals.ametsoc.org/doi/abs/10.1175/JAMC-D-11-0143.1%5D)) abaixo. Salve os resultados em variáveis diferentes. Para uma temperatura do ar (*T*) de 20°C e Umidade relativa (*UR*) de 70%, qual o valor de `Tw`? Defina variáveis para os valores *T* e (*UR*) e use-as na equação de $T_w$.
+
+$$\begin{aligned} 
+T_{w}=T\cdot atan\left [ 0.151977\cdot \left ( UR+8.313659 \right )^{1/2} \right ]+ \\
+atan\left (T+UR \right )-\\
+atan\left ( UR-1.676331 \right )+\\
+0.00391838\left ( UR \right )^{3/2}\cdot atan\left ( 0.023101\cdot UR \right )-\\
+4.686035
+\end{aligned}$$
+
+```{r}
+tw <- function(ur, temp_ar) {
+  parte_1 <- temp_ar * atan(0.151977 * (ur + 8.313659)^0.5)
+  parte_2 <- atan(temp_ar + ur) - atan(ur - 1.676331) + 0.00391838 * (ur)^(1.5) * atan(0.023101 * ur) - 4.686035
+  resultado <- parte_1 + parte_2
+
+  return(resultado)
+}
+
+(exerc_7 <- tw(70, 20))
+```
+
+8.  Determine os valores de umidade do solo:
+
+* no potencial hídrico de 10kPa (θ10kPa)
+* na capacidade de campo (θ33kPa)
+* no ponto de murcha permanente (θ1500kPa)
+
+  utilizando o conjunto de equações de pedotransferência abaixo ([Tomasela et al. 2003](https://dl.sciencesocieties.org/publications/sssaj/abstracts/67/4/1085)):
+
+![](https://lhmet.github.io/adar-ebook/images/conj-eqs-tomasella2003.png)
+
+* Considere *SI* = 16.29 (%), *CL* = 49.25 (%), *Db* = 1.25($gcm^{-3}$), *Me* = 25 (%), onde *SI* é a porcentagem de silte no solo, **CL** é a porcentagem de argila, *Db* é a densidade do solo e *Me* é a umidade equivalente em %.
+
+```{r}
+umid_solo <- function(si, cl, db, me) {
+  x_14 <- -1.05501 + 0.0650857 * si
+  x_15 <- -2.07588 + 0.0423954 * cl
+  x_16 <- -6.03402 + 4.80572 * db
+  x_17 <- -2.18409 + 8.84963 * me / 100
+  z_9 <- 0.175202 + 1.18513 * x_17 - 0.0996042 * x_17^2 + 0.327915 * x_16 - 0.0758657 * x_16^2
+  z_10 <- 0.929344 * z_9 + 0.132519 * x_14
+  theta_10 <- 0.339255 + 0.112526 * z_10
+  z_11 <- 0.191452 + 1.25652 * x_17 - 0.079098 * x_17^2 + 0.393814 * x_16 + 0.152095 * x_17 * x_16
+  theta_33 <- 0.28951 + 0.103815 * z_11
+  z_13 <- 0.235084 + 0.33033 * x_15 - 0.191838 * x_15^2 + 0.0543679 * x_15^3 + 0.977685 * x_17 + 0.304174 * x_15 * x_17 - 0.218857 * x_17^2 - 0.164373 * x_15 * x_17^2 + 0.0415057 * x_17^3 + 0.373361 * x_16 +
+    0.0811861 * x_17 * x_16 - 0.0768087 * x_15 * x_17 * x_16
+  theta_1500 <- 0.214008 + 0.0862945 * z_13
+  resultados <- c(theta_10, theta_33, theta_1500)
+  return(resultados)
+}
+
+valumid_solo <- umid_solo(16.29, 49.25, 1.25, 25)
+(uspot_hidr10k <- valumid_solo[[1]])
+(uscap_camp33k <- valumid_solo[[2]])
+(usmur_perm15k <- valumid_solo[[3]])
+```
+9.  Arredonde para 2 casas decimais os resultados da questão 8. Dica ver `?round`.
+
+```{r}
+(round_theta10 <- round(uspot_hidr10k, digits = 2))
+(round_theta33k <- round(uscap_camp33k, digits = 2))
+(round_theta15k <- round(usmur_perm15k, digits = 2))
+```
+
+10. Instale a **última versão do R** no (seu) computador usado para a resolução desta lista. Crie um script chamado `solucao-q10-NomeDoAluno.R` contendo os códigos gerados para a solução das questões 7 e 8. Faça as seguintes alterações no código do *script*:
+  * no código da questão 8, utilize a temperatura do ar (*T*) de 30°C e a Umidade Relativa (*UR*) de 30% para calcular $T_w$
+  * no código da questão 9, considere *SI* = 13 (%), *CL* = 37 (%), *Db* =  1.3 $gcm^{-3}$, *Me* = 21 (%) para recalcular $\theta_{10kPa}$, $\theta_{33kPa}$ e $\theta_{1500kPa}$.
+  * após os códigos usados para resolver as questões 8 e 9, adicione uma nova linha com a expressão `sessionInfo()`.
+  * Finalmente rode o *script* usando o *R* no modo não iterativo. Anexe o arquivo de saída `solucao-q10-NomeDoAluno.Rout` como resposta para este problema
