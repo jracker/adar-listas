@@ -1,0 +1,365 @@
+---
+title: "Lista de Exercícios 3 - ADAR/UFSM"
+author: "Jerônimo Acker D'Ornellas"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+knitr::opts_chunk$set(
+  echo = TRUE,
+  comment = "",
+  prompt = FALSE,
+  collapse = TRUE,
+  include = TRUE
+)
+
+pacotes <- c(
+  "rio",
+  "readxl",
+  "ncdf4",
+  "raster",
+  "writexl",
+  "tidyverse"
+)
+easypackages::libraries(pacotes)
+```
+
+
+## Exercícios
+
+
+
+1. Importe os dados disponíveis em http://www.aos.wisc.edu/~dvimont/MModes/RealTime/AMM.txt. A estrutura esperada dos dados importados no R é mostrada abaixo.
+
+```{r}
+amm_url <- "http://www.aos.wisc.edu/~dvimont/MModes/RealTime/AMM.txt"
+(amm_file <- tempfile(fileext = ".txt"))
+download.file(
+  url = amm_url,
+  destfile = amm_file
+)
+amm_df <- read.table(amm_file,
+  header = TRUE,
+  nrows = 867
+)
+str(amm_df)
+```
+
+```
+'data.frame':	867 obs. of  4 variables:
+ $ Year: int  1948 1948 1948 1948 1948 1948 1948 1948 1948 1948 ...
+ $ Mo  : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ SST : num  0.66 0 1 1.86 1.3 2.51 1.63 0.55 -0.48 -0.24 ...
+ $ Wind: num  -0.76 5.78 -1.47 4.74 4.81 4.34 3.92 2.6 1.46 2.11 ...
+```
+
+- - -
+
+
+2. a. Leia os dados texto não estruturados disponíveis em https://iri.columbia.edu/~forecast/ensofcst/Data/archive/ensofcst_cpc_ALL e salve-os em um arquivo texto nomeado `previsoes-enos.txt`, mantendo a 
+formatação original dos dados.
+
+```{r}
+prevenos_url <- "https://iri.columbia.edu/~forecast/ensofcst/Data/archive/ensofcst_cpc_ALL"
+cab <- readLines(prevenos_url)
+prevenos_file <- "previsoes-enos.txt"
+# escreve dados mantendo a formatação original
+writeLines(
+  text = cab,
+  con = prevenos_file # salvo no dir de trabalho
+)
+```
+
+   b. Encontre a linha do arquivo `previsoes-enos.txt` que contenha o caractere \"Jun 2020\". Utilize a função `grep(pattern = "Jun 2020", x = ...)`. Salve o resultado em uma variável chamada `lin_ini`.
+   
+```{r}
+(lin_ini <- grep(
+  pattern = "Jun 2020",
+  x = readLines(prevenos_file)
+))
+```
+
+
+   c. Determine o número de linhas do arquivo `previsoes-enos.txt` e atribua o resultado desta operação a uma variável chamada `lin_fin`.
+   
+```{r}
+(lin_fin <- length(readLines(prevenos_file)))
+```
+
+
+   d. Utilize a função adequada para importar os dados do arquivo `previsoes-enos.txt`, referentes à previsão iniciada em Junho de 2020. A variável da letra **b** pode ser útil. Faça as transformações necessárias para obter os dados na estrutura mostrada abaixo, esperada como resultado.
+   
+```{r}
+names_prev <- c("JJA", "JAS", "ASO", "SON", "OND", "NDJ", "DJF", "JFM", "FMA", "tipo_modelo", "modelo")
+prev_enos_jun2020 <- import(prevenos_file,
+  format = "fwf",
+  skip = lin_ini + 2,
+  header = FALSE,
+  nrows = 24,
+  na.strings = "-999",
+  widths = c(rep(4, 9), 3, 11),
+  col.names = names_prev
+)
+prev_enos_jun2020[1:9] <- lapply(prev_enos_jun2020[1:9], as.numeric)
+str(prev_enos_jun2020)
+
+tail(prev_enos_jun2020, n = 3)
+```
+
+   
+```
+#str(prev_enos_jun2020)
+'data.frame':	24 obs. of  11 variables:
+ $ JJA        : num  -77 -50 -36 -63 -53 3 -49 -48 -42 -41 ...
+ $ JAS        : num  -96 -76 -30 -52 -52 -2 -50 -60 -25 -50 ...
+ $ ASO        : num  -104 -92 -25 -25 -48 8 -52 -68 3 -70 ...
+ $ SON        : num  -111 -101 -26 -4 -39 28 -50 -74 27 -87 ...
+ $ OND        : num  -127 -103 -27 7 -31 41 -49 NA 42 -101 ...
+ $ NDJ        : num  -142 -105 NA 16 -21 50 NA NA 50 -107 ...
+ $ DJF        : num  -137 -93 NA 27 -11 59 NA NA 50 -107 ...
+ $ JFM        : num  NA -68 NA 41 2 67 NA NA 51 -97 ...
+ $ FMA        : num  NA NA NA 58 16 60 NA NA 50 -82 ...
+ $ tipo_modelo: chr  "  D" "  D" "  D" "  D" ...
+ $ modelo     : chr  " NASA GMAO" " NCEP CFSv" " JMA" " BCC_CSM11" ...
+ 
+#tail(prev_enos_jun2020)
+#     JJA  JAS  ASO  SON  OND  NDJ  DJF  JFM  FMA tipo_modelo     modelo
+# 22  -36  -35  -38  -41  -45  -48  -50  -47  -39           S   FSU REGR
+# 23  -26  -39  -52  -63  -69  -69  -64  -55  -44           S   UCLA-TCD
+# 24  -37  -47  -60  -65  -67  -67  -60   -1   13           C  CPC CONSO
+```
+
+
+- - - 
+
+3. a. Escreva o quadro de dados da questão **2.d** em um arquivo Excel no **formato `xlsx`** e nomeado `previsoes-enos.xlsx`. 
+
+```{r}
+prevenos_excel <- write_xlsx(
+  prev_enos_jun2020,
+  path = "previsoes-enos.xlsx" # dir de trabalho
+)
+```
+
+
+   b. Verifique se o arquivo `previsoes-enos.xlsx` realmente existe em seu computador.
+
+```{r}
+(ver_arq <- file.exists(prevenos_excel))
+```
+
+
+   c. Importe no R o arquivo `previsoes-enos.xlsx` e mostre a estrutura dos dados importados.
+
+```{r}
+dfprevenos_excel <- import(
+  file = prevenos_excel,
+  col_names = TRUE
+)
+str(dfprevenos_excel)
+```
+
+- - -
+
+4. Importe os dados da Oscilação Antártica disponível neste [link](https://www.cpc.ncep.noaa.gov/products/precip/CWlink/daily_ao_index/aao/monthly.aao.index.b79.current.ascii.table). A estrutura esperada dos dados importados é:
+
+```{r}
+aao_url <- "https://www.cpc.ncep.noaa.gov/products/precip/CWlink/daily_ao_index/aao/monthly.aao.index.b79.current.ascii.table"
+(aao_file <- tempfile(fileext = ".tsv"))
+download.file(
+  url = aao_url,
+  destfile = aao_file
+)
+names_aao <- c("Ano", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+aao <- import(aao_file,
+  header = FALSE,
+  skip = 1,
+  format = "\t",
+  col.names = names_aao,
+  fill = TRUE,
+  na.strings = ""
+)
+str(aao)
+```
+
+
+```
+#str(aao)
+'data.frame':	42 obs. of  13 variables:
+ $ Ano: int  1979 1980 1981 1982 1983 1984 1985 1986 1987 1988 ...
+ $ Jan: num  0.209 -0.447 0.231 -0.554 -1.34 ...
+ $ Feb: num  0.356 -0.98 0.039 0.277 -1.081 ...
+ $ Mar: num  0.899 -1.424 -0.966 1.603 0.166 ...
+ $ Apr: num  0.678 -2.068 -1.462 1.531 0.149 ...
+ $ May: num  0.724 -0.479 -0.344 0.118 -0.437 ...
+ $ Jun: num  1.7 0.286 0.352 0.92 -0.263 ...
+ $ Jul: num  2.412 -1.944 -0.986 -0.415 1.114 ...
+ $ Aug: num  0.546 -0.997 -2.118 0.779 0.792 ...
+ $ Sep: num  0.629 -1.701 -1.509 1.58 -0.696 ...
+ $ Oct: num  0.16 0.577 -0.26 -0.702 1.193 ...
+ $ Nov: num  -0.423 -2.013 0.626 -0.849 0.727 ...
+ $ Dec: num  -0.951 -0.356 1.116 -1.934 0.475 ...
+```
+
+5. a. Faça o download [deste arquivo](https://www.dropbox.com/s/4hc7x9s8pmfz7gq/_SS_ANNN_CITY_NAME_pressao_inst_max_min_vento_velo_dir_raja_radiacao_precipitacao_horario.xls?raw=1) Excel.
+
+```{r}
+tbl_url <- "https://www.dropbox.com/s/4hc7x9s8pmfz7gq/_SS_ANNN_CITY_NAME_pressao_inst_max_min_vento_velo_dir_raja_radiacao_precipitacao_horario.xls?raw=1"
+tbl_file <- file.path(
+  tempdir(),
+  "_SS_ANNN_CITY_NAME_pressao_inst_max_min_vento_velo_dir_raja_radiacao_precipitacao_horario.xls"
+)
+download.file(
+  url = tbl_url,
+  destfile = tbl_file,
+  mode = "wb"
+)
+```
+
+
+   b.  Abra o arquivo e procure entender como estão organizados os dados. Responda: (i) o que significa cada coluna e cada linha em termos de variáveis e observações para este conjunto de dados horários e medidas meteorológicas; (ii) quantas variáveis meteorológicas contém esta tabela de dados? (iii) O número de observações horárias (para cada dia) é o mesmo para todas variáveis? As repostas deste item são descritivas e não requerem código, apenas texto.
+   
+   
+i) Há uma coluna com uma variável referente a data e as demais colunas representam variáveis metereológicas. Em cada linha da tabela estão presentes as observações horárias diárias.Assim, o valor de cada célula nada mais é que uma medida metereológica realizada em um horário de determinado dia.
+
+ii) A tabela apresenta oito variáveis meteorológicas e uma variável referente a data. 
+
+iii) O número de observações horárias pode variar dependendo da variável analisada.
+
+
+   c. Importe o arquivo no R selecionado somente os dados das variáveis meteorológicas após a linha com a informação da hora (`HORA_UTC`).
+   
+```{r}
+tbl_df <- import(
+  file = tbl_file,
+  col_names = FALSE,
+  skip = 11
+)
+```
+
+   d. Para tornar este dados mais fáceis de entender, crie e adicione nomes às variáveis da tabela de dados importada usando os novos nomes para as variáveis, conforme tabela abaixo.
+   
+
+```{r, echo = FALSE}
+structure(list(nomes_originais = c(
+  "data", "PRESSÃO ATMOSFERICA hPa",
+  "VENTO VELOCIDADE", "VENTO DIREÇÃO graus", "RADIACAO GLOBAL KJM",
+  "PRECIPITAÇÃO mm", "VENTO RAJADA MAXIMA ms", "PRESSÃO ATMOSFÉRICA MÁXIMA hPa",
+  "PRESSÃO ATMOSFÉRICA MÍNIMA hPa"
+), nomes_novos = c(
+  "data", "p_hpa",
+  "vel_ms", "dir_graus", "radglob_kjm2", "prec_mm", "velmax_ms",
+  "pmax_hpa", "pmin_hpa"
+)), row.names = c(NA, -9L), class = c(
+  "tbl_df",
+  "tbl", "data.frame"
+))
+```
+
+  Como no R não podemos ter variáveis com nomes repetidos, use os novos nomes repetindo-os quanto for necessário e apendando a eles um "_" seguido da hora correspondente à observação. A estrutura dos dados com os novos nomes é representada simplificadamente como mostrado abaixo. Note que `N` e a hora inicial podem diferir para alguma(s) variável(is). A inspeção do arquivo Excel feita no item (b.iii) enfatizam isso. Escreva o código para chegar nesta estrutura.
+  
+  
+```{r warning = FALSE}
+nome_auxil <- c(
+  "p_hpa_", "vel_ms_",
+  "dir_graus_", "radglob_kjm2_", "prec_mm_", "velmax_ms_",
+  "pmax_hpa_", "pmin_hpa_"
+)
+rep_auxil <- c(rep(24, times = 3), 14, rep(24, times = 4))
+
+nome_rep <- paste0(
+  rep(nome_auxil, rep_auxil),
+  sequence(rep_auxil) - 1
+)
+nomes_novos <- c("data", nome_rep)
+names(tbl_df) <- nomes_novos
+tbl_df <- as_tibble(tbl_df)
+tbl_df[2:ncol(tbl_df)] <- sapply(tbl_df[2:ncol(tbl_df)], as.numeric)
+str(tbl_df)
+```
+  
+
+```
+tibble [730 x 183] (S3: tbl_df/tbl/data.frame)
+ $ data           : POSIXct[1:730], format: "2010-01-01" ...
+ $ p_hpa_0        : num [1:730] 1003 999 1000 999 997 ...
+ $ p_hpa_1        : num [1:730] 1003 999 1001 1000 996 ...
+ ...
+ $ p_hpa_N       : num [1:730] 999 999 999 996 994 ...
+ $ vel_ms_0       : num [1:730] 5.1 1.3 1.9 1.5 2.3 2.2 4.5 4.2 2.8 1.9 ...
+ $ vel_ms_1       : num [1:730] 4.3 1.8 3.7 3.4 1 1.9 3.5 5.1 2 1.2 ...
+ ...
+ $ vel_ms_N      : num [1:730] 1.1 1.4 4.5 2.6 1 0.2 5 1.8 1.3 1.3 ...
+ $ dir_graus_0    : num [1:730] 100 126 93 192 124 63 149 90 149 53 ...
+ $ dir_graus_1    : num [1:730] 104 91 99 68 350 77 150 89 171 87 ...
+ ...
+ $ dir_graus_N   : num [1:730] 123 95 65 57 101 360 88 120 103 338 ...
+ ...
+  [list output truncated]
+```
+
+
+
+- - -
+
+
+
+6. a. Utilizando o R, faça o *download* [deste arquivo netCDF](https://www.dropbox.com/s/w3wp6iwxqex95ep/S_America_model_wtd_v2.nc?dl=1) com dados de profundidade do lençol freático para a América do Sul.
+
+```{r}
+url_lf <- "https://www.dropbox.com/s/w3wp6iwxqex95ep/S_America_model_wtd_v2.nc?dl=1"
+lf_file <- file.path(tempdir(), "S_America_model_wtd_v2.nc")
+download.file(
+  url = url_lf,
+  destfile = lf_file,
+  mode = "wb"
+)
+```
+
+
+   b. Descubra  o(s) nome(s) e a(s) unidades da(s) variável(is) armazenada(s) no arquivo netCDF usando o pacote **ncdf4**. A resposta desta questão são dois vetores do tipo caractere, um com cada informação: `var_name` e `var_unidade`.
+
+```{r}
+lf <- nc_open(filename = lf_file)
+var_name <- names(lf$var)
+var_unidade <- lf$var$WTD$units
+```
+
+
+   c. Importe os dados para o R usando o pacote raster.
+
+```{r}
+lf_raster <- brick(lf_file)
+# lf_raster
+# object.size(lf_raster) # tamanho do arquivo
+```
+
+
+   d. Converta os dados importados em um quadro de dados (*data frame*) incluindo as coordenadas das células do raster e ignorando as células sem informação (oceanos). 
+   
+```{r}
+memory.size(max = TRUE)
+gc()
+df_lf <- as.data.frame(
+  x = lf_raster,
+  xy = TRUE, # lon e lat p/ cada célula
+  na.rm = TRUE # mantém dados dos continentes
+)
+```
+   
+
+   e. Altere os nomes das colunas do quadro de dados para "wtd", "lon", "lat"
+
+```{r}
+names(df_lf) <- c("wtd", "lon", "lat")
+```
+
+
+   f. Compare as dimensões do *quadro de dados* com as dimensões do objeto importado como raster. Por que o número de linhas do *quadro de dados* não corresponde ao número de células do raster? 
+
+```{r}
+(nrow(df_lf) < ncell(lf_raster))
+```
+O número de linhas não corresponde ao número de células do raster porque ao fazer a coerção do arquivo para um quadro de dados o argumento `na.rm = TRUE` faz com que as células com `NA`, sem informação, sejam removidas.
