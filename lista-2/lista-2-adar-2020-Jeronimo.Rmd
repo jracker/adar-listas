@@ -268,11 +268,41 @@ tar_est2 <- c(
 
 > Dica: Faça um gráfico para visualizar as temperaturas das duas estações. Isso facilitará a solução.
 
+```{r}
+# Gráfico tar_est1
+quickplot(
+  x = 0:23,
+  y = tar_est1,
+  geom = c("point","line"),
+  main = "Temperatura Estação 1",
+  xlab = "horas",
+  ylab = "Temperatura(ºC)"
+)
+
+# Gráfico tar_est2
+quickplot(
+  x = 0:23,
+  y = tar_est2,
+  geom = c("point","line"),
+  main = "Temperatura Estação 2",
+  xlab = "horas",
+  ylab = "Temperatura(ºC)"
+)
+```
+
 `r paste("  ")`**a.** Determine a média diária da $T_{ar}$ das duas estações arrendondando para uma casa decimal. Salve a média de cada estação nas variáveis `tmed_est1` e `tmed_est2`. 
 
 ```{r}
-tmed_est1 <- round(mean(tar_est1), digits = 1)
-tmed_est2 <- round(mean(tar_est2), digits = 1)
+# Temperatura média diária com arredondamento com uma casa decimal
+
+# Estação 1
+tmed_est1 <- tar_est1 %>%
+  mean() %>% 
+  round(digits = 1)
+# Estação 2
+tmed_est2 <- tar_est2 %>% 
+  mean() %>% 
+  round(digits = 1)
 ```
 
 
@@ -280,7 +310,11 @@ tmed_est2 <- round(mean(tar_est2), digits = 1)
 `r paste("  ")`**b**. Utilizando as variáveis do item anterior, verifique usando comparação lógica, em qual estação o ambiente é mais quente?
 
 ```{r}
-tmed_est1 > tmed_est2
+ifelse(
+  test = tmed_est1 > tmed_est2,
+  yes = "A temperatura média da estação 1 é maior",
+  no = "A temperatura média da estação 2 é maior"
+)
 ```
 
 
@@ -303,35 +337,27 @@ atd_est2 <- round(max(tar_est2) - min(tar_est2), digits = 1)
 `r paste("  ")`**e**. Qual o horário de ocorrência das temperaturas máximas e mínimas em cada estação? Salve os resultados nas variáveis `hmax_est{i}` e `hmin_est{i}`, com $i = 1, 2$.
 
 ```{r}
-# indices para selecionar as máximas e mínimas temp de est1 e est2
-ind_est1max <- which.max(tar_est1)
-ind_est2max <- which.max(tar_est2)
-ind_est1min <- which.min(tar_est1)
-ind_est2min <- which.min(tar_est2)
-
-# horários de máximas temperaturas nas estações 1 e 2 respectivamente
-(hmax_est <- c(ind_est1max, ind_est2max))
-# horários de mínimas temperaturas nas estações 1 e 2 respectivamente
-(hmin_est <- c(ind_est1min, ind_est2min))
+# Retorna os horários de ocorrência da máxima temperatura da est1 e est2
+hmax_est <- c(which.max(tar_est1) - 1,which.max(tar_est2) - 1)
+hmin_est <- c(which.min(tar_est1) - 1, which.min(tar_est2) - 1)
 ```
 
 
 `r paste("  ")`**f**. Quando `tar_est2` é maior que `tar_est1` qual a maior diferença absoluta de temperatura entre as duas estações?
 
 ```{r}
-# horários em que tar_est2 > tar_est1
-hmaior_est2 <- tar_est2[which(tar_est2 > tar_est1)]
-hmenor_est1 <- tar_est1[which(tar_est2 > tar_est1)]
-dif_abs <- hmaior_est2 - hmenor_est1 # para tar_est2 > tar_est1
-(maxdif_abs <- max(dif_abs))
+idmaior_est2<- which(tar_est2 > tar_est1) # posições est2 maior que est1
+# Retorna o valor da maior diferença absoluta entre as estações
+maxdif_abs <- max(tar_est2[idmaior_est2] - tar_est1[idmaior_est2])  
 ```
 
 
 `r paste("  ")`**g**. Qual a hora correspondende a ocorrência daquela maior diferença absoluta de temperatura obtida no item anterior?
 
 ```{r}
-difabs_total <- abs(tar_est2 - tar_est1)
-(hrdif_abs <- which(difabs_total == maxdif_abs) - 1)
+vet_dif <- tar_est2 - tar_est1 # vetor de diferença auxiliar
+# retorna hora de maior dif abs
+hrmax_dif <- which(vet_dif == maxdif_abs) - 1 
 ```
 
 
@@ -339,22 +365,33 @@ difabs_total <- abs(tar_est2 - tar_est1)
 
 
 ```{r}
-# Começa a partir das 15 horas
-hrapos_tmaxe1 <- tar_est1[ind_est1max:length(tar_est1)]
-# Começa a partir das 14 horas
-hrapos_tmaxe2 <- tar_est2[ind_est2max:length(tar_est2)]
-quedas_tarest1 <- c(NA, diff(hrapos_tmaxe1))
-quedas_tarest2 <- c(NA, diff(hrapos_tmaxe2))
-hrps_est1 <- (ind_est1max:length(tar_est1))[which.min(quedas_tarest1)] - 1 
-hrsp_est2 <- (ind_est2max:length(tar_est2))[which.min(quedas_tarest2)] - 1 
-(hps_est <- c(hrps_est1, hrsp_est2))
+# Posição da temperatura máxima
+hmax_ests <- c(which.max(tar_est1),which.max(tar_est2))
+# Seleciona a partir do horário de maior temperatura
+tar_aux1 <- tar_est1[hmax_ests[1]:length(tar_est1)]
+tar_aux2 <- tar_est2[hmax_ests[2]:length(tar_est2)]
+dtar_aux1 <- which.max(abs(diff(tar_aux1))) # índice max dif
+dtar_aux2 <- which.max(abs(diff(tar_aux2))) # índice max dif
+
+# Se precisar da hora ao invés da posição subtrair 1 dos elementos
+# de hps_est
+hps_est <- c(
+  which(tar_est1 == tar_est1[dtar_aux1  + hmax_ests[1]]),
+  which(tar_est2 == tar_est2[dtar_aux2  + hmax_ests[2]])
+)
 ```
 
 `r paste("  ")`**i**. Em quais horas as temperaturas das duas estações estão mais próximas uma da outra, ou seja com menos de 0,5°C de diferença ?
 
 ```{r}
-limiar_dif <- difabs_total < 0.5
-(difmin_est <- which(limiar_dif) - 1)
+hrprox_est <- c(
+  which(abs(tar_est1 - tar_est2) < 0.5)
+)
+paste0("Os horários com uma diferência mínima de 0.5ºC entre as duas estações são: ",
+       hrprox_est[1] - 1,",",
+       hrprox_est[2]- 1," e ",
+       hrprox_est[3] - 1," horas"
+)
 ```
 
 `r paste("  ")`**j**. Calcule a temperatura média diária usando os seguintes métodos para estação 2.
@@ -380,7 +417,10 @@ $T_{med_{3}} = (T_{7} + T_{14} + 2T_{21})/4$, salvando em uma variável `tar_met
 Compare este resultados com aqueles obtidos no item **a**. Qual é melhor?
 
 ```{r}
-dif_met <- c(abs(tmed_est2 - tar_met1), abs(tmed_est2 - tar_met2), abs(tmed_est2 - tar_met3))
+dif_met <- c(abs(tmed_est2 - tar_met1), 
+             abs(tmed_est2 - tar_met2), 
+             abs(tmed_est2 - tar_met3)
+)
 (which(dif_met == min(dif_met)))
 ```
 
